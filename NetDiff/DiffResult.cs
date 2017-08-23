@@ -15,7 +15,8 @@
 
         public override string ToString()
         {
-            return string.Format("Obj1:{0} Obj2:{1} Status:{2}", Obj1.ToString() ?? string.Empty, Obj2.ToString() ?? string.Empty, Status);
+            return string.Format("Obj1:{0} Obj2:{1} Status:{2}", Obj1.ToString() ?? string.Empty, Obj2.ToString() ?? string.Empty, Status)
+                .Replace("\0", "");
         }
     }
 }
