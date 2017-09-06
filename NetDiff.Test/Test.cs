@@ -17,13 +17,13 @@ namespace NetDiff.Test
             var option = DiffOption<char>.Default;
 
             option.Order = DiffOrder.GreedyDeleteFirst;
-            var results1 = NetDiff.Diff(str1, str2, option);
+            var results1 = DiffUtil.Diff(str1, str2, option);
             option.Order = DiffOrder.GreedyInsertFirst;
-            var results2 = NetDiff.Diff(str1, str2, option);
+            var results2 = DiffUtil.Diff(str1, str2, option);
             option.Order = DiffOrder.LazyDeleteFirst;
-            var results3 = NetDiff.Diff(str1, str2, option);
+            var results3 = DiffUtil.Diff(str1, str2, option);
             option.Order = DiffOrder.LazyInsertFirst;
-            var results4 = NetDiff.Diff(str1, str2, option);
+            var results4 = DiffUtil.Diff(str1, str2, option);
 
             Assert.AreEqual(str1.Count(), results1.Count());
             Assert.IsTrue(results1.All(r => r.Status == DiffStatus.Equal));
@@ -55,27 +55,27 @@ namespace NetDiff.Test
             var option = DiffOption<char>.Default;
 
             option.Order = DiffOrder.GreedyDeleteFirst;
-            var results1 = NetDiff.Diff(str1, str2, option);
+            var results1 = DiffUtil.Diff(str1, str2, option);
             option.Order = DiffOrder.GreedyInsertFirst;
-            var results2 = NetDiff.Diff(str1, str2, option);
+            var results2 = DiffUtil.Diff(str1, str2, option);
             option.Order = DiffOrder.LazyDeleteFirst;
-            var results3 = NetDiff.Diff(str1, str2, option);
+            var results3 = DiffUtil.Diff(str1, str2, option);
             option.Order = DiffOrder.LazyInsertFirst;
-            var results4 = NetDiff.Diff(str1, str2, option);
+            var results4 = DiffUtil.Diff(str1, str2, option);
             option.Limit = 10;
-            var results5 = NetDiff.Diff(str1, str2, option);
+            var results5 = DiffUtil.Diff(str1, str2, option);
 
-            var src1 = new string(NetDiff.CreateSrc(results1).ToArray());
-            var src2 = new string(NetDiff.CreateSrc(results2).ToArray());
-            var src3 = new string(NetDiff.CreateSrc(results3).ToArray());
-            var src4 = new string(NetDiff.CreateSrc(results4).ToArray());
-            var src5 = new string(NetDiff.CreateSrc(results5).ToArray());
+            var src1 = new string(DiffUtil.CreateSrc(results1).ToArray());
+            var src2 = new string(DiffUtil.CreateSrc(results2).ToArray());
+            var src3 = new string(DiffUtil.CreateSrc(results3).ToArray());
+            var src4 = new string(DiffUtil.CreateSrc(results4).ToArray());
+            var src5 = new string(DiffUtil.CreateSrc(results5).ToArray());
 
-            var dst1 = new string(NetDiff.CreateDst(results1).ToArray());
-            var dst2 = new string(NetDiff.CreateDst(results2).ToArray());
-            var dst3 = new string(NetDiff.CreateDst(results3).ToArray());
-            var dst4 = new string(NetDiff.CreateDst(results4).ToArray());
-            var dst5 = new string(NetDiff.CreateDst(results5).ToArray());
+            var dst1 = new string(DiffUtil.CreateDst(results1).ToArray());
+            var dst2 = new string(DiffUtil.CreateDst(results2).ToArray());
+            var dst3 = new string(DiffUtil.CreateDst(results3).ToArray());
+            var dst4 = new string(DiffUtil.CreateDst(results4).ToArray());
+            var dst5 = new string(DiffUtil.CreateDst(results5).ToArray());
 
             Assert.AreEqual(src1, str1);
             Assert.AreEqual(src2, str1);
@@ -105,7 +105,7 @@ namespace NetDiff.Test
                 Order = DiffOrder.LazyInsertFirst,
             };
 
-            var results = NetDiff.Diff(str1, str2, option);
+            var results = DiffUtil.Diff(str1, str2, option);
 
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
@@ -130,7 +130,7 @@ namespace NetDiff.Test
                 Order = DiffOrder.LazyDeleteFirst,
             };
 
-            var results = NetDiff.Diff(str1, str2, option);
+            var results = DiffUtil.Diff(str1, str2, option);
 
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
@@ -155,7 +155,7 @@ namespace NetDiff.Test
                 Order = DiffOrder.GreedyInsertFirst,
             };
 
-            var results = NetDiff.Diff(str1, str2, option);
+            var results = DiffUtil.Diff(str1, str2, option);
 
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
@@ -180,7 +180,7 @@ namespace NetDiff.Test
                 Order = DiffOrder.GreedyDeleteFirst,
             };
 
-            var results = NetDiff.Diff(str1, str2, option);
+            var results = DiffUtil.Diff(str1, str2, option);
 
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
@@ -199,7 +199,7 @@ namespace NetDiff.Test
             var option = DiffOption<char>.Default;
             option.EqualityComparer = new CaseInsensitiveComparer();
 
-            var results = NetDiff.Diff(str1, str2, option);
+            var results = DiffUtil.Diff(str1, str2, option);
 
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
@@ -219,12 +219,12 @@ namespace NetDiff.Test
 
             var sw = new System.Diagnostics.Stopwatch();
             sw.Start();
-            var result1 = NetDiff.Diff(str1, str2);
+            var result1 = DiffUtil.Diff(str1, str2);
             sw.Stop();
             var time1 = sw.Elapsed;
 
             sw.Restart();
-            var result2 = NetDiff.Diff(str1, str2, option);
+            var result2 = DiffUtil.Diff(str1, str2, option);
             sw.Stop();
             var time2 = sw.Elapsed;
 

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace NetDiff
 {
-    public class NetDiff
+    public class DiffUtil
     {
         public static IEnumerable<DiffResult<T>> Diff<T>(IEnumerable<T> seq1, IEnumerable<T> seq2)
         {

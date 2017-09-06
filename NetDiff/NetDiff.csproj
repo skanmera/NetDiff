@@ -44,7 +44,7 @@
     <Compile Include="DiffResult.cs" />
     <Compile Include="EditGraph.cs" />
     <Compile Include="Extension.cs" />
-    <Compile Include="NetDiff.cs" />
+    <Compile Include="DiffUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DiffStatus.cs" />
     <Compile Include="DiffOrder.cs" />
