@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace NetDiff
 {
     internal static class Extension
     {
-        public static IEnumerable<Tuple<TSource, TSource>> MakePairsWithNext<TSource>(
-                    this IEnumerable<TSource> source)
+        public static IEnumerable<Tuple<TSource, TSource>> MakePairsWithNext<TSource>(this IEnumerable<TSource> source)
         {
             using (var enumerator = source.GetEnumerator())
             {
@@ -23,6 +23,16 @@ namespace NetDiff
                     }
                 }
             }
+        }
+
+        public static TSource FindMin<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
+        {
+            return source.FirstOrDefault(c => selector(c).Equals(source.Min(selector)));
+        }
+
+        public static TSource FindMax<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
+        {
+            return source.FirstOrDefault(c => selector(c).Equals(source.Max(selector)));
         }
     }
 }

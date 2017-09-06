@@ -3,8 +3,8 @@
     public enum DiffStatus
     {
         Equal,
-        Added,
-        Removed,
+        Inserted,
+        Deleted,
     }
 
     public static class DiffStatusExtension
@@ -14,8 +14,8 @@
             switch (self)
             {
                 case DiffStatus.Equal: return '=';
-                case DiffStatus.Added: return '+';
-                case DiffStatus.Removed: return '-';
+                case DiffStatus.Inserted: return '+';
+                case DiffStatus.Deleted: return '-';
             }
 
             throw new System.Exception();

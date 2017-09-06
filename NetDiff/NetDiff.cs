@@ -6,16 +6,34 @@ namespace NetDiff
 {
     public class NetDiff
     {
-        public static IEnumerable<DiffResult<T>> Diff<T>(IEnumerable<T> seq1, IEnumerable<T> seq2, IEqualityComparer<T> compare = null)
+        public static IEnumerable<DiffResult<T>> Diff<T>(IEnumerable<T> seq1, IEnumerable<T> seq2)
         {
-            var editGrap = new EditGraph<T>(seq1, seq2, compare);
-            var waypoints = editGrap.Snake();
+            return Diff(seq1, seq2, DiffOption<T>.Default);
+        }
+
+        public static IEnumerable<DiffResult<T>> Diff<T>(IEnumerable<T> seq1, IEnumerable<T> seq2, DiffOption<T> option)
+        {
+            var editGrap = new EditGraph<T>(seq1, seq2);
+            var waypoints = editGrap.CalculatePath(option);
 
             return MakeResults<T>(waypoints, seq1, seq2);
         }
 
+        public static IEnumerable<T> CreateSrc<T>(IEnumerable<DiffResult<T>> diffResults)
+        {
+            return diffResults.Where(r => r.Status != DiffStatus.Inserted).Select(r => r.Obj1);
+        }
+
+        public static IEnumerable<T> CreateDst<T>(IEnumerable<DiffResult<T>> diffResults)
+        {
+            return diffResults.Where(r => r.Status != DiffStatus.Deleted).Select(r => r.Obj2);
+        }
+
         private static IEnumerable<DiffResult<T>> MakeResults<T>(IEnumerable<Point> waypoints, IEnumerable<T> seq1, IEnumerable<T> seq2)
         {
+            var array1 = seq1.ToArray();
+            var array2 = seq2.ToArray();
+
             foreach (var pair in waypoints.MakePairsWithNext())
             {
                 var status = GetStatus(pair.Item1, pair.Item2);
@@ -24,14 +42,14 @@ namespace NetDiff
                 switch (status)
                 {
                     case DiffStatus.Equal:
-                        obj1 = seq1.ElementAt(pair.Item2.X - 1);
-                        obj2 = seq2.ElementAt(pair.Item2.Y - 1);
+                        obj1 = array1[pair.Item2.X - 1];
+                        obj2 = array2[pair.Item2.Y - 1];
                         break;
-                    case DiffStatus.Added:
-                        obj2 = seq2.ElementAt(pair.Item2.Y - 1);
+                    case DiffStatus.Inserted:
+                        obj2 = array2[pair.Item2.Y - 1];
                         break;
-                    case DiffStatus.Removed:
-                        obj1 = seq1.ElementAt(pair.Item2.X - 1);
+                    case DiffStatus.Deleted:
+                        obj1 = array1[pair.Item2.X - 1];
                         break;
                 }
 
@@ -44,9 +62,9 @@ namespace NetDiff
             if (current.X != prev.X && current.Y != prev.Y)
                 return DiffStatus.Equal;
             else if (current.X != prev.X)
-                return DiffStatus.Removed;
+                return DiffStatus.Deleted;
             else if (current.Y != prev.Y)
-                return DiffStatus.Added;
+                return DiffStatus.Inserted;
             else
                 throw new Exception();
         }

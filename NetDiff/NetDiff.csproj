@@ -40,14 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DiffOption.cs" />
     <Compile Include="DiffResult.cs" />
     <Compile Include="EditGraph.cs" />
     <Compile Include="Extension.cs" />
     <Compile Include="NetDiff.cs" />
-    <Compile Include="Node.cs" />
-    <Compile Include="Point.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DiffStatus.cs" />
+    <Compile Include="DiffOrder.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

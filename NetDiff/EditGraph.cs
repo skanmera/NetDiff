@@ -11,42 +11,118 @@ namespace NetDiff
         Diagonal,
     }
 
-    internal class EditGraph<T>
+    internal struct Point : IEquatable<Point>
     {
-        private List<Node> heads;
-        private Point endpoint;
-        private Node endNode;
-        private int delta;
-        private IEqualityComparer<T> compare;
-        private HashSet<Point> passedPoints;
-        private IEnumerable<T> seq1;
-        private IEnumerable<T> seq2;
+        public int X { get; }
+        public int Y { get; }
 
-        public EditGraph(IEnumerable<T> seq1, IEnumerable<T> seq2, IEqualityComparer<T> compare = null)
+        public Point(int x, int y)
         {
-            this.seq1 = seq1;
-            this.seq2 = seq2;
-            heads = new List<Node>();
-            endpoint = new Point(seq1.Count(), seq2.Count());
-            delta = 0;
-            this.compare = compare;
-            passedPoints = new HashSet<Point>();
+            X = x;
+            Y = y;
         }
 
-        public List<Point> Snake()
+        public override bool Equals(object obj)
         {
-            Initialize();
+            if (!(obj is Point))
+                return false;
+
+            return Equals((Point)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            var hash = 17;
+            hash = hash * 23 + X.GetHashCode();
+            hash = hash * 23 + Y.GetHashCode();
+
+            return hash;
+        }
+
+        public bool Equals(Point other)
+        {
+            return X == other.X && Y == other.Y;
+        }
+
+        public override string ToString()
+        {
+            return $"X:{X} Y:{Y}";
+        }
+    }
+
+    internal class Node
+    {
+        public Point Point { get; set; }
+        public Node Parent { get; set; }
+        public int Score { get; set; }
+        public int MaxScore { get; set; }
+        public int MinScore { get; set; }
+
+        public Node(Point point)
+        {
+            Point = point;
+        }
+
+        public override string ToString()
+        {
+            return $"X:{Point.X} Y:{Point.Y} Score:{Score} MaxScore:{MaxScore} MinScore:{MinScore}";
+        }
+    }
+
+    internal class EditGraph<T>
+    {
+        private T[] seq1;
+        private T[] seq2;
+        private DiffOption<T> option;
+        private List<Node> heads;
+        private Point endpoint;
+        private int[] farthestPoints;
+        private int offset;
+        private bool isEnd;
+
+        public EditGraph(
+            IEnumerable<T> seq1, IEnumerable<T> seq2)
+        {
+            this.seq1 = seq1.ToArray();
+            this.seq2 = seq2.ToArray();
+            endpoint = new Point(this.seq1.Length, this.seq2.Length);
+            offset = this.seq2.Length;
+        }
+
+        public List<Point> CalculatePath(DiffOption<T> option)
+        {
+            this.option = option;
+
+            BeginCalculatePath();
 
             while (Next()) { }
 
+            return EndCalculatePath();
+        }
+
+        private void Initialize()
+        {
+            farthestPoints = new int[seq1.Length + seq2.Length + 1];
+            heads = new List<Node>();
+        }
+
+        private void BeginCalculatePath()
+        {
+            Initialize();
+
+            heads.Add(new Node(new Point(0, 0)));
+
+            Snake();
+        }
+
+        private List<Point> EndCalculatePath()
+        {
             var wayponit = new List<Point>();
-            var current = endNode;
-            while (true)
+
+            var current = heads.Where(h => h.Point.Equals(endpoint)).FirstOrDefault();
+            while (current != null)
             {
                 wayponit.Add(current.Point);
-
-                if (current.Parent == null)
-                    break;
 
                 current = current.Parent;
             }
@@ -56,157 +132,173 @@ namespace NetDiff
             return wayponit;
         }
 
-        private void Initialize()
-        {
-            heads.Clear();
-            delta = 0;
-
-            var startHead = new Node(new Point(0, 0));
-            while (true)
-            {
-                Node extendHead;
-                if (TryExtendHeadDiagonal(startHead, out extendHead))
-                    startHead = extendHead;
-                else
-                    break;
-            }
-
-            heads.Add(startHead);
-            UpdateEndNode();
-        }
-
         private bool Next()
         {
-            if (IsEnd())
+            if (isEnd)
                 return false;
 
-            var enabledDiagonalLineNumbers = CalculateEnabledDiagonalLineNumbers(++delta);
-            ExtendHeads(enabledDiagonalLineNumbers);
-            UpdateEndNode();
+            UpdateHeads();
 
             return true;
         }
 
-        private void UpdateEndNode()
+        private void UpdateHeads()
         {
-            endNode = heads.FirstOrDefault(h => h.Point.Equals(endpoint));
-        }
+            if (option.Limit > 0 && heads.Count > option.Limit)
+            {
+                var selectedNode = SelectNode(heads);
+                heads.Clear();
+                heads.Add(selectedNode);
+            }
 
-        private bool IsEnd()
-        {
-            return endNode != null;
-        }
-
-        private void ExtendHeads(IEnumerable<int> enabledDiagonalLineNumbers)
-        {
             var updated = new List<Node>();
+
             foreach (var head in heads)
             {
-                updated.Add(TryExtendHead(head, enabledDiagonalLineNumbers, Direction.Right));
-                updated.Add(TryExtendHead(head, enabledDiagonalLineNumbers, Direction.Bottom));
-            }
+                var firstDirection = IsInsertFirst() ? Direction.Bottom : Direction.Right;
+                var secondDirection = IsInsertFirst() ? Direction.Right : Direction.Bottom;
 
-            heads = updated;
-        }
-
-        private Node TryExtendHead(Node head, IEnumerable<int> enabledDiagonalLineNumbers, Direction direction)
-        {
-            Node extendedHead;
-            var isExtended = TryExtendHead(head, enabledDiagonalLineNumbers, direction, out extendedHead);
-            if (isExtended)
-            {
-                Node diagonalHead;
-                while (true)
+                Node firstHead;
+                if (TryCreateHead(head, firstDirection, out firstHead))
                 {
-                    if (TryExtendHeadDiagonal(extendedHead, out diagonalHead))
-                        extendedHead = diagonalHead;
-                    else
-                        break;
+                    updated.Add(firstHead);
+                }
+
+                Node secondHead;
+                if (TryCreateHead(head, secondDirection, out secondHead))
+                {
+                    updated.Add(secondHead);
                 }
             }
 
-            return isExtended ? extendedHead : head;
-        }
+            heads.Clear();
 
-        private bool TryExtendHeadDiagonal(Node head, out Node extendedHead)
-        {
-            extendedHead = null;
-            if (CanMoveDiagonal(head.Point))
+            var samePointHeadGroups = updated.GroupBy(n => n.Point);
+            foreach (var samePointHeads in samePointHeadGroups)
             {
-                var extendedPoint = new Point(head.Point.X + 1, head.Point.Y + 1);
-                extendedHead = new Node(extendedPoint);
-                extendedHead.Parent = head;
-
-                return true;
+                var selectedNode = SelectNode(samePointHeads);
+                heads.Add(selectedNode);
             }
 
-            return false;
+            Snake();
         }
 
-        private bool TryExtendHead(Node head, IEnumerable<int> enabledDiagonalLineNumbers, Direction direction, out Node extendedHead)
+        private bool IsInsertFirst()
         {
-            extendedHead = null;
-            var movePoint = GetMovePoint(head.Point, direction);
-            if (CanMove(movePoint))
-            {
-                if (enabledDiagonalLineNumbers.Any(n => IsOnDiagonalLine(movePoint, n)))
-                {
-                    extendedHead = new Node(movePoint);
-                    extendedHead.Parent = head;
+            return option.Order == DiffOrder.LazyInsertFirst || option.Order == DiffOrder.GreedyInsertFirst;
+        }
 
-                    return true;
-                }
+        private Node SelectNode(IEnumerable<Node> nodes)
+        {
+            switch (option.Order)
+            {
+                case DiffOrder.GreedyInsertFirst:
+                    return nodes.FindMax(ni => ni.MaxScore);
+                case DiffOrder.GreedyDeleteFirst:
+                    return nodes.FindMin(ni => ni.MinScore);
             }
 
-            return false;
+            return nodes.FindMin(ni => Math.Abs(ni.MaxScore) + Math.Abs(ni.MinScore));
         }
 
-        private Point GetMovePoint(Point currentPoint, Direction direction)
+        public void UpdateScore(Node node, Point prev)
+        {
+            node.Score -= node.Point.X - prev.X;
+            node.Score += node.Point.Y - prev.Y;
+
+            node.MaxScore = Math.Max(node.MaxScore, node.Score);
+            node.MinScore = Math.Min(node.MinScore, node.Score);
+        }
+
+        private void Snake()
+        {
+            heads = heads.Select(Snake).ToList();
+        }
+
+        private Node Snake(Node head)
+        {
+            Node newHead;
+            while (true)
+            {
+                if (TryCreateHead(head, Direction.Diagonal, out newHead))
+                    head = newHead;
+                else
+                    break;
+            }
+
+            return head;
+        }
+
+        private bool TryCreateHead(Node head, Direction direction, out Node newHead)
+        {
+            newHead = null;
+            var newPoint = GetPoint(head.Point, direction);
+
+            if (!CanCreateHead(head.Point, direction, newPoint))
+                return false;
+
+            newHead = new Node(newPoint);
+            newHead.Parent = head;
+            newHead.Score = head.Score;
+            newHead.MaxScore = head.MaxScore;
+            newHead.MinScore = head.MinScore;
+            UpdateScore(newHead, head.Point);
+
+            isEnd |= newHead.Point.Equals(endpoint);
+
+            return true;
+        }
+
+        private bool CanCreateHead(Point currentPoint, Direction direction, Point nextPoint)
+        {
+            if (!InRange(nextPoint))
+                return false;
+
+            if (direction == Direction.Diagonal)
+            {
+                var equal = option.EqualityComparer != null
+                    ? option.EqualityComparer.Equals(seq1[nextPoint.X - 1], (seq2[nextPoint.Y - 1]))
+                    : seq1[nextPoint.X - 1].Equals(seq2[nextPoint.Y - 1]);
+
+                if (!equal)
+                    return false;
+            }
+
+            return UpdateFarthestPoint(nextPoint);
+        }
+
+        private Point GetPoint(Point currentPoint, Direction direction)
         {
             switch (direction)
             {
-                case Direction.Right: return new Point(currentPoint.X + 1, currentPoint.Y);
-                case Direction.Bottom: return new Point(currentPoint.X, currentPoint.Y + 1);
-                case Direction.Diagonal: return new Point(currentPoint.X + 1, currentPoint.Y + 1);
+                case Direction.Right:
+                    return new Point(currentPoint.X + 1, currentPoint.Y);
+                case Direction.Bottom:
+                    return new Point(currentPoint.X, currentPoint.Y + 1);
+                case Direction.Diagonal:
+                    return new Point(currentPoint.X + 1, currentPoint.Y + 1);
             }
 
             throw new ArgumentException();
         }
 
-        private bool CanMove(Point movePoint)
+        private bool InRange(Point point)
         {
-            return movePoint.X <= endpoint.X && movePoint.Y <= endpoint.Y && passedPoints.Add(movePoint);
+            return point.X >= 0 && point.Y >= 0 && point.X <= endpoint.X && point.Y <= endpoint.Y;
         }
 
-        private bool CanMoveDiagonal(Point currentPoint)
+        private bool UpdateFarthestPoint(Point point)
         {
-            var diagonal = new Point(currentPoint.X + 1, currentPoint.Y + 1);
+            var k = point.X - point.Y;
+            var y = farthestPoints[k + offset];
 
-            if (diagonal.X > endpoint.X || diagonal.Y > endpoint.Y)
+            if (point.Y < y)
                 return false;
 
-            var equals = compare != null
-                ? compare.Equals(seq1.ElementAt(currentPoint.X), (seq2.ElementAt(currentPoint.Y)))
-                : seq1.ElementAt(currentPoint.X).Equals(seq2.ElementAt(currentPoint.Y));
+            farthestPoints[k + offset] = point.Y;
 
-            if (!equals)
-                return false;
-
-            return passedPoints.Add(diagonal);
-        }
-
-        private static IEnumerable<int> CalculateEnabledDiagonalLineNumbers(int delta)
-        {
-            for (int i = delta; i >= -delta; i -= 2)
-                yield return i;
-        }
-
-        private static bool IsOnDiagonalLine(Point point, int diagonalLineNumber)
-        {
-            var minX = diagonalLineNumber >= 0 ? diagonalLineNumber : 0;
-            var minY = diagonalLineNumber >= 0 ? 0 : diagonalLineNumber;
-
-            return point.X >= minX && point.Y >= minY && Math.Abs(point.X - point.Y) == minX - minY;
+            return true;
         }
     }
 }
+
