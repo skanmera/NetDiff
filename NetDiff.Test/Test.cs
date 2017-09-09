@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,134 +8,158 @@ namespace NetDiff.Test
     public class Test
     {
         [TestMethod]
-        public void TestEquals()
+        public void Equal_GreedyDeleteFirst()
         {
             var str1 = "abcde";
             var str2 = "abcde";
-
             var option = DiffOption<char>.Default;
-
             option.Order = DiffOrder.GreedyDeleteFirst;
-            var results1 = DiffUtil.Diff(str1, str2, option);
-            option.Order = DiffOrder.GreedyInsertFirst;
-            var results2 = DiffUtil.Diff(str1, str2, option);
-            option.Order = DiffOrder.LazyDeleteFirst;
-            var results3 = DiffUtil.Diff(str1, str2, option);
-            option.Order = DiffOrder.LazyInsertFirst;
-            var results4 = DiffUtil.Diff(str1, str2, option);
+            var results = DiffUtil.Diff(str1, str2, option);
 
-            Assert.AreEqual(str1.Count(), results1.Count());
-            Assert.IsTrue(results1.All(r => r.Status == DiffStatus.Equal));
-            Assert.IsTrue(results1.Select(r => r.Obj1).SequenceEqual(str1.Select(c => c)));
-            Assert.IsTrue(results1.Select(r => r.Obj2).SequenceEqual(str1.Select(c => c)));
-
-            Assert.AreEqual(str1.Count(), results2.Count());
-            Assert.IsTrue(results2.All(r => r.Status == DiffStatus.Equal));
-            Assert.IsTrue(results2.Select(r => r.Obj1).SequenceEqual(str1.Select(c => c)));
-            Assert.IsTrue(results2.Select(r => r.Obj2).SequenceEqual(str1.Select(c => c)));
-
-            Assert.AreEqual(str1.Count(), results3.Count());
-            Assert.IsTrue(results3.All(r => r.Status == DiffStatus.Equal));
-            Assert.IsTrue(results3.Select(r => r.Obj1).SequenceEqual(str1.Select(c => c)));
-            Assert.IsTrue(results3.Select(r => r.Obj2).SequenceEqual(str1.Select(c => c)));
-
-            Assert.AreEqual(str1.Count(), results4.Count());
-            Assert.IsTrue(results4.All(r => r.Status == DiffStatus.Equal));
-            Assert.IsTrue(results4.Select(r => r.Obj1).SequenceEqual(str1.Select(c => c)));
-            Assert.IsTrue(results4.Select(r => r.Obj2).SequenceEqual(str1.Select(c => c)));
+            Assert.AreEqual(str1.Count(), results.Count());
+            Assert.IsTrue(results.All(r => r.Status == DiffStatus.Equal));
+            Assert.IsTrue(results.Select(r => r.Obj1).SequenceEqual(str1.Select(c => c)));
+            Assert.IsTrue(results.Select(r => r.Obj2).SequenceEqual(str1.Select(c => c)));
         }
 
         [TestMethod]
-        public void TestRestore()
+        public void Equal_GreedyInsertFirst()
+        {
+            var str1 = "abcde";
+            var str2 = "abcde";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.GreedyInsertFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(str1.Count(), results.Count());
+            Assert.IsTrue(results.All(r => r.Status == DiffStatus.Equal));
+            Assert.IsTrue(results.Select(r => r.Obj1).SequenceEqual(str1.Select(c => c)));
+            Assert.IsTrue(results.Select(r => r.Obj2).SequenceEqual(str1.Select(c => c)));
+        }
+
+        [TestMethod]
+        public void Equal_LazyDeleteFirst()
+        {
+            var str1 = "abcde";
+            var str2 = "abcde";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.LazyDeleteFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(str1.Count(), results.Count());
+            Assert.IsTrue(results.All(r => r.Status == DiffStatus.Equal));
+            Assert.IsTrue(results.Select(r => r.Obj1).SequenceEqual(str1.Select(c => c)));
+            Assert.IsTrue(results.Select(r => r.Obj2).SequenceEqual(str1.Select(c => c)));
+        }
+
+        [TestMethod]
+        public void Equal_LazyInsertFirst()
+        {
+            var str1 = "abcde";
+            var str2 = "abcde";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.LazyInsertFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(str1.Count(), results.Count());
+            Assert.IsTrue(results.All(r => r.Status == DiffStatus.Equal));
+            Assert.IsTrue(results.Select(r => r.Obj1).SequenceEqual(str1.Select(c => c)));
+            Assert.IsTrue(results.Select(r => r.Obj2).SequenceEqual(str1.Select(c => c)));
+        }
+
+        [TestMethod]
+        public void Restore_GreedyDeleteFirst()
         {
             var str1 = "q4DU8sbeD4JdhFA4hWShCv3bbtD7djX5SaNnQUHJHdCEJs6X2LJipbEEr7bZZbzcUrpuKpRDKNz92x5P";
             var str2 = "3GKLWNDdCxip8kda2r2MUT45RrHUiESQhmhUZtMcpBGcSwJVS9uq4DWBAQk2zPUJCJabaeWuP5mxyPBz";
-
             var option = DiffOption<char>.Default;
-
             option.Order = DiffOrder.GreedyDeleteFirst;
-            var results1 = DiffUtil.Diff(str1, str2, option);
-            option.Order = DiffOrder.GreedyInsertFirst;
-            var results2 = DiffUtil.Diff(str1, str2, option);
-            option.Order = DiffOrder.LazyDeleteFirst;
-            var results3 = DiffUtil.Diff(str1, str2, option);
-            option.Order = DiffOrder.LazyInsertFirst;
-            var results4 = DiffUtil.Diff(str1, str2, option);
-            option.Limit = 10;
-            var results5 = DiffUtil.Diff(str1, str2, option);
-
-            var src1 = new string(DiffUtil.CreateSrc(results1).ToArray());
-            var src2 = new string(DiffUtil.CreateSrc(results2).ToArray());
-            var src3 = new string(DiffUtil.CreateSrc(results3).ToArray());
-            var src4 = new string(DiffUtil.CreateSrc(results4).ToArray());
-            var src5 = new string(DiffUtil.CreateSrc(results5).ToArray());
-
-            var dst1 = new string(DiffUtil.CreateDst(results1).ToArray());
-            var dst2 = new string(DiffUtil.CreateDst(results2).ToArray());
-            var dst3 = new string(DiffUtil.CreateDst(results3).ToArray());
-            var dst4 = new string(DiffUtil.CreateDst(results4).ToArray());
-            var dst5 = new string(DiffUtil.CreateDst(results5).ToArray());
-
-            Assert.AreEqual(src1, str1);
-            Assert.AreEqual(src2, str1);
-            Assert.AreEqual(src3, str1);
-            Assert.AreEqual(src4, str1);
-            Assert.AreEqual(src5, str1);
-
-            Assert.AreEqual(dst1, str2);
-            Assert.AreEqual(dst2, str2);
-            Assert.AreEqual(dst3, str2);
-            Assert.AreEqual(dst4, str2);
-            Assert.AreEqual(dst5, str2);
-        }
-
-        /*
-             a b a b a b
-             - + - + - +
-        */
-        [TestMethod]
-        public void TestLazyInsertFirst()
-        {
-            var str1 = "aaa";
-            var str2 = "bbb";
-
-            var option = new DiffOption<char>
-            {
-                Order = DiffOrder.LazyInsertFirst,
-            };
-
             var results = DiffUtil.Diff(str1, str2, option);
 
-            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
-            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
-            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(2).Status);
-            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(3).Status);
-            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(4).Status);
-            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(5).Status);
+            var src = new string(DiffUtil.CreateSrc(results).ToArray());
+            var dst = new string(DiffUtil.CreateDst(results).ToArray());
+            Assert.AreEqual(dst, str2);
+            Assert.AreEqual(src, str1);
+        }
+
+        [TestMethod]
+        public void Restore_GreedyInsertFirst()
+        {
+            var str1 = "q4DU8sbeD4JdhFA4hWShCv3bbtD7djX5SaNnQUHJHdCEJs6X2LJipbEEr7bZZbzcUrpuKpRDKNz92x5P";
+            var str2 = "3GKLWNDdCxip8kda2r2MUT45RrHUiESQhmhUZtMcpBGcSwJVS9uq4DWBAQk2zPUJCJabaeWuP5mxyPBz";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.GreedyInsertFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            var src = new string(DiffUtil.CreateSrc(results).ToArray());
+            var dst = new string(DiffUtil.CreateDst(results).ToArray());
+            Assert.AreEqual(dst, str2);
+            Assert.AreEqual(src, str1);
+        }
+
+        [TestMethod]
+        public void Restore_LazyInsertFirst()
+        {
+            var str1 = "q4DU8sbeD4JdhFA4hWShCv3bbtD7djX5SaNnQUHJHdCEJs6X2LJipbEEr7bZZbzcUrpuKpRDKNz92x5P";
+            var str2 = "3GKLWNDdCxip8kda2r2MUT45RrHUiESQhmhUZtMcpBGcSwJVS9uq4DWBAQk2zPUJCJabaeWuP5mxyPBz";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.LazyInsertFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            var src = new string(DiffUtil.CreateSrc(results).ToArray());
+            var dst = new string(DiffUtil.CreateDst(results).ToArray());
+            Assert.AreEqual(dst, str2);
+            Assert.AreEqual(src, str1);
+        }
+
+        [TestMethod]
+        public void Restore_LazyDeleteFirst()
+        {
+            var str1 = "q4DU8sbeD4JdhFA4hWShCv3bbtD7djX5SaNnQUHJHdCEJs6X2LJipbEEr7bZZbzcUrpuKpRDKNz92x5P";
+            var str2 = "3GKLWNDdCxip8kda2r2MUT45RrHUiESQhmhUZtMcpBGcSwJVS9uq4DWBAQk2zPUJCJabaeWuP5mxyPBz";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.LazyDeleteFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            var src = new string(DiffUtil.CreateSrc(results).ToArray());
+            var dst = new string(DiffUtil.CreateDst(results).ToArray());
+            Assert.AreEqual(dst, str2);
+            Assert.AreEqual(src, str1);
+        }
+
+        [TestMethod]
+        public void Restore_PrioritizedPerformance()
+        {
+            var str1 = "q4DU8sbeD4JdhFA4hWShCv3bbtD7djX5SaNnQUHJHdCEJs6X2LJipbEEr7bZZbzcUrpuKpRDKNz92x5P";
+            var str2 = "3GKLWNDdCxip8kda2r2MUT45RrHUiESQhmhUZtMcpBGcSwJVS9uq4DWBAQk2zPUJCJabaeWuP5mxyPBz";
+            var option = DiffOption<char>.Default;
+            option.Limit = 10;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            var src = new string(DiffUtil.CreateSrc(results).ToArray());
+            var dst = new string(DiffUtil.CreateDst(results).ToArray());
+            Assert.AreEqual(dst, str2);
+            Assert.AreEqual(src, str1);
         }
 
         /*
-             b a b a b a
-             + - + - + -
+             a a a b b b 
+             - - - + + +
         */
         [TestMethod]
-        public void TestLazyDeleteFirst()
+        public void DifferentAll_GreedyDeleteFirst()
         {
             var str1 = "aaa";
             var str2 = "bbb";
-
-            var option = new DiffOption<char>
-            {
-                Order = DiffOrder.LazyDeleteFirst,
-            };
-
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.GreedyDeleteFirst;
             var results = DiffUtil.Diff(str1, str2, option);
 
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
-            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(2).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
-            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(4).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(4).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(5).Status);
         }
 
@@ -145,16 +168,12 @@ namespace NetDiff.Test
              + + + - - -
         */
         [TestMethod]
-        public void TestGreedyInsertFirst()
+        public void DifferentAll_GreedyInsertFirst()
         {
             var str1 = "aaa";
             var str2 = "bbb";
-
-            var option = new DiffOption<char>
-            {
-                Order = DiffOrder.GreedyInsertFirst,
-            };
-
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.GreedyInsertFirst;
             var results = DiffUtil.Diff(str1, str2, option);
 
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
@@ -166,32 +185,223 @@ namespace NetDiff.Test
         }
 
         /*
-             a a a b b b 
-             - - - + + +
+             a b a b a b
+             - + - + - +
         */
         [TestMethod]
-        public void TestGreedyDeleteFirst()
+        public void DifferentAll_LazyDeleteFirst()
         {
             var str1 = "aaa";
             var str2 = "bbb";
-
-            var option = new DiffOption<char>
-            {
-                Order = DiffOrder.GreedyDeleteFirst,
-            };
-
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.LazyDeleteFirst;
             var results = DiffUtil.Diff(str1, str2, option);
 
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
-            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(2).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
-            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(4).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(4).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(5).Status);
         }
 
+        /*
+             b a b a b a
+             + - + - + -
+        */
         [TestMethod]
-        public void TestComparer()
+        public void  DifferentAll_LazyInsertFirst()
+        {
+            var str1 = "aaa";
+            var str2 = "bbb";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.LazyInsertFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(3).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(4).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(5).Status);
+        }
+
+        /*
+             a b c d
+             = = = +
+        */
+        [TestMethod]
+        public void  Appended()
+        {
+            var str1 = "abc";
+            var str2 = "abcd";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.GreedyDeleteFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
+
+            option.Order = DiffOrder.GreedyInsertFirst;
+            results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
+
+            option.Order = DiffOrder.LazyDeleteFirst;
+            results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
+
+            option.Order = DiffOrder.LazyInsertFirst;
+            results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
+        }
+
+        /*
+             a b c d
+             + = = = 
+        */
+        [TestMethod]
+        public void Prepended()
+        {
+            var str1 = "bcd";
+            var str2 = "abcd";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.GreedyDeleteFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(3).Status);
+
+            option.Order = DiffOrder.GreedyInsertFirst;
+            results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(3).Status);
+
+            option.Order = DiffOrder.LazyDeleteFirst;
+            results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(3).Status);
+
+            option.Order = DiffOrder.LazyInsertFirst;
+            results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(3).Status);
+        }
+
+        [TestMethod]
+        public void CaseMultiSameScore_GreedyDeleteFirst()
+        {
+            var str1 = "cdhijkz";
+            var str2 = "ldxhnokz";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.GreedyDeleteFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(4).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(5).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(6).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(7).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(8).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(9).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(10).Status);
+        }
+
+        [TestMethod]
+        public void CaseMultiSameScore_GreedyInsertFirst()
+        {
+            var str1 = "cdhijkz";
+            var str2 = "ldxhnokz";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.GreedyInsertFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(4).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(5).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(6).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(7).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(8).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(9).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(10).Status);
+        }
+
+        [TestMethod]
+        public void CaseMultiSameScore_LazyDeleteFirst()
+        {
+            var str1 = "cdhijkz";
+            var str2 = "ldxhnokz";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.LazyDeleteFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(4).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(5).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(6).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(7).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(8).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(9).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(10).Status);
+        }
+
+        [TestMethod]
+        public void CaseMultiSameScore_LazyInsertFirst()
+        {
+            var str1 = "cdhijkz";
+            var str2 = "ldxhnokz";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.LazyInsertFirst;
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(4).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(5).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(6).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(7).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(8).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(9).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(10).Status);
+        }
+
+        [TestMethod]
+        public void SpecifiedComparer()
         {
             var str1 = "abc";
             var str2 = "dBf";
@@ -209,7 +419,7 @@ namespace NetDiff.Test
         }
 
         [TestMethod]
-        public void TestPerformance()
+        public void Performance()
         {
             var str1 = Enumerable.Repeat("Good dog", 1000).SelectMany(c => c);
             var str2 = Enumerable.Repeat("Bad dog", 1000).SelectMany(c => c);

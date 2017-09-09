@@ -54,9 +54,9 @@ namespace NetDiff
     {
         public Point Point { get; set; }
         public Node Parent { get; set; }
-        public int Score { get; set; }
-        public int MaxScore { get; set; }
-        public int MinScore { get; set; }
+        public int ScoreX { get; set; }
+        public int ScoreY { get; set; }
+        public int StraightCount { get; set; }
 
         public Node(Point point)
         {
@@ -65,7 +65,7 @@ namespace NetDiff
 
         public override string ToString()
         {
-            return $"X:{Point.X} Y:{Point.Y} Score:{Score} MaxScore:{MaxScore} MinScore:{MinScore}";
+            return $"X:{Point.X} Y:{Point.Y} ScoreX:{ScoreX} ScoreY:{ScoreY} Straight:{StraightCount}";
         }
     }
 
@@ -155,19 +155,16 @@ namespace NetDiff
 
             foreach (var head in heads)
             {
-                var firstDirection = IsInsertFirst() ? Direction.Bottom : Direction.Right;
-                var secondDirection = IsInsertFirst() ? Direction.Right : Direction.Bottom;
-
-                Node firstHead;
-                if (TryCreateHead(head, firstDirection, out firstHead))
+                Node rightHead;
+                if (TryCreateHead(head, Direction.Right, out rightHead))
                 {
-                    updated.Add(firstHead);
+                    updated.Add(rightHead);
                 }
 
-                Node secondHead;
-                if (TryCreateHead(head, secondDirection, out secondHead))
+                Node bottomHead;
+                if (TryCreateHead(head, Direction.Bottom, out bottomHead))
                 {
-                    updated.Add(secondHead);
+                    updated.Add(bottomHead);
                 }
             }
 
@@ -183,31 +180,36 @@ namespace NetDiff
             Snake();
         }
 
-        private bool IsInsertFirst()
-        {
-            return option.Order == DiffOrder.LazyInsertFirst || option.Order == DiffOrder.GreedyInsertFirst;
-        }
-
         private Node SelectNode(IEnumerable<Node> nodes)
         {
             switch (option.Order)
             {
-                case DiffOrder.GreedyInsertFirst:
-                    return nodes.FindMax(ni => ni.MaxScore);
                 case DiffOrder.GreedyDeleteFirst:
-                    return nodes.FindMin(ni => ni.MinScore);
+                    return nodes.FindMin(n => n.ScoreY);
+                case DiffOrder.GreedyInsertFirst:
+                    return nodes.FindMin(n => n.ScoreX);
+                case DiffOrder.LazyDeleteFirst:
+                    return nodes.FindMins(n => n.StraightCount).FindMin(n => n.ScoreY);
+                case DiffOrder.LazyInsertFirst:
+                    return nodes.FindMins(n => n.StraightCount).FindMin(n => n.ScoreX);
             }
 
-            return nodes.FindMin(ni => Math.Abs(ni.MaxScore) + Math.Abs(ni.MinScore));
+            return nodes.FirstOrDefault();
         }
 
         public void UpdateScore(Node node, Point prev)
         {
-            node.Score -= node.Point.X - prev.X;
-            node.Score += node.Point.Y - prev.Y;
+            node.ScoreX += node.Point.X;
+            node.ScoreY += node.Point.Y;
 
-            node.MaxScore = Math.Max(node.MaxScore, node.Score);
-            node.MinScore = Math.Min(node.MinScore, node.Score);
+            if (node.Parent != null && node.Parent.Parent != null)
+            {
+                if (node.Point.X == node.Parent.Point.X && node.Point.X == node.Parent.Parent.Point.X ||
+                    node.Point.Y == node.Parent.Point.Y && node.Point.Y == node.Parent.Parent.Point.Y)
+                {
+                    node.StraightCount++;
+                }
+            }
         }
 
         private void Snake()
@@ -239,9 +241,9 @@ namespace NetDiff
 
             newHead = new Node(newPoint);
             newHead.Parent = head;
-            newHead.Score = head.Score;
-            newHead.MaxScore = head.MaxScore;
-            newHead.MinScore = head.MinScore;
+            newHead.ScoreX = head.ScoreX;
+            newHead.ScoreY = head.ScoreY;
+            newHead.StraightCount = head.StraightCount;
             UpdateScore(newHead, head.Point);
 
             isEnd |= newHead.Point.Equals(endpoint);
