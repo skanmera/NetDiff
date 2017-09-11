@@ -441,6 +441,28 @@ namespace NetDiff.Test
             Assert.IsTrue(time2 < time1);
         }
 
+        [TestMethod]
+        public void CaseEmpty()
+        {
+            var str1 = string.Empty;
+            var str2 = string.Empty;
+
+            var results = DiffUtil.Diff(str1, str2);
+
+            Assert.IsTrue(!results.Any());
+        }
+
+        [TestMethod]
+        public void CaseNull()
+        {
+            string str1 = null;
+            var str2 = string.Empty;
+
+            var results = DiffUtil.Diff(str1, str2);
+
+            Assert.IsTrue(!results.Any());
+        }
+
         internal class CaseInsensitiveComparer : IEqualityComparer<char>
         {
             public bool Equals(char x, char y)

@@ -13,6 +13,9 @@ namespace NetDiff
 
         public static IEnumerable<DiffResult<T>> Diff<T>(IEnumerable<T> seq1, IEnumerable<T> seq2, DiffOption<T> option)
         {
+            if (seq1 == null || seq2 == null || (!seq1.Any() && !seq2.Any()))
+                return Enumerable.Empty<DiffResult<T>>();
+
             var editGrap = new EditGraph<T>(seq1, seq2);
             var waypoints = editGrap.CalculatePath(option);
 
