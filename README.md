@@ -434,3 +434,6 @@ var results = DiffUtil.Diff("aaa", "bbb", option);
 var optimized = DiffUtil.OptimizeCaseDeletedFirst(results);
 ```
 
+## License
+
+[MIT License](http://opensource.org/licenses/MIT)
