@@ -401,6 +401,67 @@ namespace NetDiff.Test
         }
 
         [TestMethod]
+        public void OptimizeCaseDeleteFirst()
+        {
+            var str1 = "aaa";
+            var str2 = "bbb";
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.GreedyDeleteFirst;
+            var results = DiffUtil.OptimizeCaseDeletedFirst(DiffUtil.Diff(str1, str2, option)).ToList();
+
+            /*
+                obj1  a a a 
+                obj2      b b b  
+                      - - M + + 
+            */
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Modified, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(4).Status);
+
+            option.Order = DiffOrder.LazyDeleteFirst;
+            results = DiffUtil.OptimizeCaseDeletedFirst(DiffUtil.Diff(str1, str2, option)).ToList();
+
+            /*
+                obj1  a a a 
+                obj2  b b b
+                      M M M
+            */
+            Assert.AreEqual(DiffStatus.Modified, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Modified, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Modified, results.ElementAt(2).Status);
+
+            option.Order = DiffOrder.GreedyInsertFirst;
+            results = DiffUtil.OptimizeCaseDeletedFirst(DiffUtil.Diff(str1, str2, option)).ToList();
+
+            /*
+                obj1        a a a
+                obj2  b b b   
+                      + + + - - -
+            */
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(3).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(4).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(5).Status);
+
+            option.Order = DiffOrder.LazyInsertFirst;
+            results = DiffUtil.OptimizeCaseDeletedFirst(DiffUtil.Diff(str1, str2, option)).ToList();
+
+            /*
+                obj1    a a
+                obj2  b b b a
+                      + M M -
+            */
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Modified, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Modified, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(3).Status);
+        }
+
+        [TestMethod]
         public void SpecifiedComparer()
         {
             var str1 = "abc";

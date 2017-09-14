@@ -32,6 +32,43 @@ namespace NetDiff
             return diffResults.Where(r => r.Status != DiffStatus.Deleted).Select(r => r.Obj2);
         }
 
+        public static IEnumerable<DiffResult<T>> OptimizeCaseDeletedFirst<T>(IEnumerable<DiffResult<T>> diffResults)
+        {
+            return Optimize(diffResults, true);
+        }
+
+        public static IEnumerable<DiffResult<T>> OptimizeCaseInsertedFirst<T>(IEnumerable<DiffResult<T>> diffResults)
+        {
+            return Optimize(diffResults, false);
+        }
+
+        private static IEnumerable<DiffResult<T>> Optimize<T>(IEnumerable<DiffResult<T>> diffResults, bool deleteFirst = true)
+        {
+            var currentStatus = deleteFirst ? DiffStatus.Deleted : DiffStatus.Inserted;
+            var nextStatus = deleteFirst ? DiffStatus.Inserted : DiffStatus.Deleted;
+
+            var queue = new Queue<DiffResult<T>>(diffResults);
+            while (queue.Any())
+            {
+                var result = queue.Dequeue();
+                if (result.Status == currentStatus)
+                {
+                    if (queue.Any() && queue.Peek().Status == nextStatus)
+                    {
+                        var obj1 = deleteFirst ? result.Obj1 : queue.Dequeue().Obj1;
+                        var obj2 = deleteFirst ? queue.Dequeue().Obj2 : result.Obj2;
+                        yield return new DiffResult<T>(obj1, obj2, DiffStatus.Modified);
+                    }
+                    else
+                        yield return result;
+
+                    continue;
+                }
+
+                yield return result;
+            }
+        }
+
         private static IEnumerable<DiffResult<T>> MakeResults<T>(IEnumerable<Point> waypoints, IEnumerable<T> seq1, IEnumerable<T> seq2)
         {
             var array1 = seq1.ToArray();
