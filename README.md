@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # NetDiff
 
 This is the C # implementation of the Diff algorithm.
@@ -435,4 +434,3 @@ var results = DiffUtil.Diff("aaa", "bbb", option);
 var optimized = DiffUtil.OptimizeCaseDeletedFirst(results);
 ```
 
->>>>>>> origin/master
