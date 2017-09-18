@@ -207,4 +207,22 @@ Console.WriteLine(stopwatch.Elapsed);
 00:00:00.6112575
 ```
 
+<br/>
 
+## Optimize
+
+Convert deleted/inserted to modified.
+
+```cs
+/*
+    src a  a  a        a a a 
+    dst   b  b  b  ->  b b b
+         - + - + -     M M M
+*/
+var results = DiffUtil.Diff("aaa", "bbb", option);
+var optimized = DiffUtil.OptimizeCaseDeletedFirst(results);
+```
+
+## License
+
+[MIT License](http://opensource.org/licenses/MIT)
