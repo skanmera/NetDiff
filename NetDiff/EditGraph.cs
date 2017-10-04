@@ -76,7 +76,8 @@ namespace NetDiff
         private DiffOption<T> option;
         private List<Node> heads;
         private Point endpoint;
-        private int[] farthestPoints;
+        private int editDistance;
+        private int[] editDistances;
         private int offset;
         private bool isEnd;
 
@@ -95,14 +96,16 @@ namespace NetDiff
 
             BeginCalculatePath();
 
-            while (Next()) { }
+            editDistance = 1;
+
+            while (Next()) { editDistance++; }
 
             return EndCalculatePath();
         }
 
         private void Initialize()
         {
-            farthestPoints = new int[seq1.Length + seq2.Length + 1];
+            editDistances = new int[seq1.Length + seq2.Length + 1];
             heads = new List<Node>();
         }
 
@@ -214,21 +217,32 @@ namespace NetDiff
 
         private void Snake()
         {
-            heads = heads.Select(Snake).ToList();
+            var tmp = new List<Node>();
+            foreach (var h in heads)
+            {
+                tmp.Add(h);
+                var newHead = Snake(h);
+
+                if (newHead != null)
+                    tmp.Add(newHead);
+            }
+
+            heads = tmp;
         }
 
         private Node Snake(Node head)
         {
-            Node newHead;
+            Node newHead = null;
             while (true)
             {
-                if (TryCreateHead(head, Direction.Diagonal, out newHead))
-                    head = newHead;
+                Node tmp;
+                if (TryCreateHead(newHead ?? head, Direction.Diagonal, out tmp))
+                    newHead = tmp;
                 else
                     break;
             }
 
-            return head;
+            return newHead;
         }
 
         private bool TryCreateHead(Node head, Direction direction, out Node newHead)
@@ -292,12 +306,13 @@ namespace NetDiff
         private bool UpdateFarthestPoint(Point point)
         {
             var k = point.X - point.Y;
-            var y = farthestPoints[k + offset];
 
-            if (point.Y < y)
+            var d = editDistances[k + offset];
+
+            if (editDistance < d)
                 return false;
 
-            farthestPoints[k + offset] = point.Y;
+            editDistances[k + offset] = editDistance;
 
             return true;
         }
