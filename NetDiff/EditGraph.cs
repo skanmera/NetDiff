@@ -152,7 +152,7 @@ namespace NetDiff
             if (option.Limit > 0 && heads.Count > option.Limit)
             {
                 var selectedNode = SelectNode(heads);
-                heads.Clear();
+                Initialize();
                 heads.Add(selectedNode);
             }
 
