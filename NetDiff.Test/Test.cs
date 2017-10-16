@@ -640,23 +640,6 @@ namespace NetDiff.Test
         }
 
         [TestMethod]
-        public void Performance2()
-        {
-            var str1 = Enumerable.Repeat("good dog", 1000000).SelectMany(c => c);
-            var str2 = Enumerable.Repeat("Bad dog", 1000000).SelectMany(c => c);
-
-            var option = DiffOption<char>.Default;
-            option.Limit = 100;
-            var sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-            var result1 = DiffUtil.Diff(str1, str2, option);
-            sw.Stop();
-            var time1 = sw.Elapsed.TotalSeconds;
-
-            System.Console.WriteLine(sw.Elapsed.TotalSeconds);
-        }
-
-        [TestMethod]
         public void CaseEmpty()
         {
             var str1 = string.Empty;
