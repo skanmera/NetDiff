@@ -93,6 +93,12 @@ namespace NetDiff
 
         public List<Point> CalculatePath(DiffOption<T> option)
         {
+            if (!seq1.Any())
+                return Enumerable.Range(0, seq2.Length + 1).Select(i => new Point(0, i)).ToList();
+
+            if (!seq2.Any())
+                return Enumerable.Range(0, seq1.Length + 1).Select(i => new Point(i, 0)).ToList();
+
             this.option = option;
 
             BeginCalculatePath();
@@ -152,7 +158,7 @@ namespace NetDiff
             if (option.Limit > 0 && heads.Count > option.Limit)
             {
                 var selectedNode = SelectNode(heads);
-                Initialize();
+                heads.Clear();
                 heads.Add(selectedNode);
             }
 

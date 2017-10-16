@@ -557,6 +557,66 @@ namespace NetDiff.Test
         }
 
         [TestMethod]
+        public void CaseReplace()
+        {
+            string str1 = "abbbc";
+            string str2 = "adbbc";
+
+            var option = DiffOption<char>.Default;
+            option.Order = DiffOrder.GreedyDeleteFirst;
+
+            var results = DiffUtil.Diff(str1, str2, option);
+
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(3).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(4).Status);
+            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(5).Status);
+        }
+
+        [TestMethod]
+        public void GivenEmpty()
+        {
+            string str1 = "";
+            string str2 = "";
+
+            var results = DiffUtil.Diff(str1, str2);
+
+            Assert.IsTrue(!results.Any());
+        }
+
+        [TestMethod]
+        public void GivenSeq1Empty()
+        {
+            string str1 = "";
+            string str2 = "abcde";
+
+            var results = DiffUtil.Diff(str1, str2);
+
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(4).Status);
+        }
+
+        [TestMethod]
+        public void GivenSeq2Empty()
+        {
+            string str1 = "abced";
+            string str2 = "";
+
+            var results = DiffUtil.Diff(str1, str2);
+
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(3).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(4).Status);
+        }
+
+        [TestMethod]
         public void Performance()
         {
             var str1 = Enumerable.Repeat("Good dog", 1000).SelectMany(c => c);
@@ -577,6 +637,23 @@ namespace NetDiff.Test
             var time2 = sw.Elapsed;
 
             Assert.IsTrue(time2 < time1);
+        }
+
+        [TestMethod]
+        public void Performance2()
+        {
+            var str1 = Enumerable.Repeat("good dog", 1000000).SelectMany(c => c);
+            var str2 = Enumerable.Repeat("Bad dog", 1000000).SelectMany(c => c);
+
+            var option = DiffOption<char>.Default;
+            option.Limit = 100;
+            var sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            var result1 = DiffUtil.Diff(str1, str2, option);
+            sw.Stop();
+            var time1 = sw.Elapsed.TotalSeconds;
+
+            System.Console.WriteLine(sw.Elapsed.TotalSeconds);
         }
 
         [TestMethod]
