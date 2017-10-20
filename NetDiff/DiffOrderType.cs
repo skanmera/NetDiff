@@ -1,6 +1,6 @@
 ﻿namespace NetDiff
 {
-    public enum DiffOrder
+    public enum DiffOrderType
     {
         LazyInsertFirst,
         LazyDeleteFirst,

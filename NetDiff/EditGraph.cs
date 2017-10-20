@@ -54,9 +54,6 @@ namespace NetDiff
     {
         public Point Point { get; set; }
         public Node Parent { get; set; }
-        public int ScoreX { get; set; }
-        public int ScoreY { get; set; }
-        public int StraightCount { get; set; }
 
         public Node(Point point)
         {
@@ -65,7 +62,7 @@ namespace NetDiff
 
         public override string ToString()
         {
-            return $"X:{Point.X} Y:{Point.Y} ScoreX:{ScoreX} ScoreY:{ScoreY} Straight:{StraightCount}";
+            return $"X:{Point.X} Y:{Point.Y}";
         }
     }
 
@@ -77,8 +74,6 @@ namespace NetDiff
         private List<Node> heads;
         private Point endpoint;
         private int[] farthestPoints;
-        private int editDistance;
-        private int[] editDistances;
         private int offset;
         private bool isEnd;
 
@@ -103,9 +98,7 @@ namespace NetDiff
 
             BeginCalculatePath();
 
-            editDistance = 1;
-
-            while (Next()) { editDistance++; }
+            while (Next()) { }
 
             return EndCalculatePath();
         }
@@ -113,7 +106,6 @@ namespace NetDiff
         private void Initialize()
         {
             farthestPoints = new int[seq1.Length + seq2.Length + 1];
-            editDistances = new int[farthestPoints.Length];
             heads = new List<Node>();
         }
 
@@ -157,9 +149,10 @@ namespace NetDiff
         {
             if (option.Limit > 0 && heads.Count > option.Limit)
             {
-                var selectedNode = SelectNode(heads);
+                var tmp = heads.First();
                 heads.Clear();
-                heads.Add(selectedNode);
+
+                heads.Add(tmp);
             }
 
             var updated = new List<Node>();
@@ -179,48 +172,9 @@ namespace NetDiff
                 }
             }
 
-            heads.Clear();
-
-            var samePointHeadGroups = updated.GroupBy(n => n.Point);
-            foreach (var samePointHeads in samePointHeadGroups)
-            {
-                var selectedNode = SelectNode(samePointHeads);
-                heads.Add(selectedNode);
-            }
+            heads = updated;
 
             Snake();
-        }
-
-        private Node SelectNode(IEnumerable<Node> nodes)
-        {
-            switch (option.Order)
-            {
-                case DiffOrder.GreedyDeleteFirst:
-                    return nodes.FindMin(n => n.ScoreY);
-                case DiffOrder.GreedyInsertFirst:
-                    return nodes.FindMin(n => n.ScoreX);
-                case DiffOrder.LazyDeleteFirst:
-                    return nodes.FindMins(n => n.StraightCount).FindMin(n => n.ScoreY);
-                case DiffOrder.LazyInsertFirst:
-                    return nodes.FindMins(n => n.StraightCount).FindMin(n => n.ScoreX);
-            }
-
-            return nodes.FirstOrDefault();
-        }
-
-        public void UpdateScore(Node node, Point prev)
-        {
-            node.ScoreX += node.Point.X;
-            node.ScoreY += node.Point.Y;
-
-            if (node.Parent != null && node.Parent.Parent != null)
-            {
-                if (node.Point.X == node.Parent.Point.X && node.Point.X == node.Parent.Parent.Point.X ||
-                    node.Point.Y == node.Parent.Point.Y && node.Point.Y == node.Parent.Parent.Point.Y)
-                {
-                    node.StraightCount++;
-                }
-            }
         }
 
         private void Snake()
@@ -228,11 +182,12 @@ namespace NetDiff
             var tmp = new List<Node>();
             foreach (var h in heads)
             {
-                tmp.Add(h);
                 var newHead = Snake(h);
 
                 if (newHead != null)
                     tmp.Add(newHead);
+                else
+                    tmp.Add(h);
             }
 
             heads = tmp;
@@ -263,10 +218,6 @@ namespace NetDiff
 
             newHead = new Node(newPoint);
             newHead.Parent = head;
-            newHead.ScoreX = head.ScoreX;
-            newHead.ScoreY = head.ScoreY;
-            newHead.StraightCount = head.StraightCount;
-            UpdateScore(newHead, head.Point);
 
             isEnd |= newHead.Point.Equals(endpoint);
 
@@ -315,12 +266,10 @@ namespace NetDiff
         {
             var k = point.X - point.Y;
             var y = farthestPoints[k + offset];
-            var d = editDistances[k + offset];
 
-            if (point.Y < y && d < editDistance)
+            if (point.Y <= y)
                 return false;
 
-            editDistances[k + offset] = editDistance;
             farthestPoints[k + offset] = point.Y;
 
             return true;

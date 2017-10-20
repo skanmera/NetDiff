@@ -8,7 +8,7 @@ namespace NetDiff
     {
         public static IEnumerable<DiffResult<T>> Diff<T>(IEnumerable<T> seq1, IEnumerable<T> seq2)
         {
-            return Diff(seq1, seq2, DiffOption<T>.Default);
+            return Diff(seq1, seq2, new DiffOption<T>());
         }
 
         public static IEnumerable<DiffResult<T>> Diff<T>(IEnumerable<T> seq1, IEnumerable<T> seq2, DiffOption<T> option)
@@ -107,6 +107,114 @@ namespace NetDiff
                 return DiffStatus.Inserted;
             else
                 throw new Exception();
+        }
+
+        public static IEnumerable<DiffResult<T>> Order<T>(IEnumerable<DiffResult<T>> results, DiffOrderType orderType)
+        {
+            var resultArray = results.ToArray();
+
+            for (int i = 0; i < resultArray.Length; i++)
+            {
+                if (resultArray[i].Status == DiffStatus.Deleted)
+                {
+                    while (i - 1 >= 0)
+                    {
+                        if (resultArray[i - 1].Status == DiffStatus.Equal && resultArray[i].Obj1.Equals(resultArray[i - 1].Obj1))
+                        {
+                            var tmp = resultArray[i];
+                            resultArray[i] = resultArray[i - 1];
+                            resultArray[i - 1] = tmp;
+
+                            i--;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            var resultQueue = new Queue<DiffResult<T>>(resultArray);
+            var additionQueue = new Queue<DiffResult<T>>();
+            var deletionQueue = new Queue<DiffResult<T>>();
+
+            while (resultQueue.Any())
+            {
+                if (resultQueue.Peek().Status == DiffStatus.Equal)
+                {
+                    yield return resultQueue.Dequeue();
+                    continue;
+                }
+
+                while (resultQueue.Any() && resultQueue.Peek().Status != DiffStatus.Equal)
+                {
+                    while (resultQueue.Any() && resultQueue.Peek().Status == DiffStatus.Inserted)
+                    {
+                        additionQueue.Enqueue(resultQueue.Dequeue());
+                    }
+
+                    while (resultQueue.Any() && resultQueue.Peek().Status == DiffStatus.Deleted)
+                    {
+                        deletionQueue.Enqueue(resultQueue.Dequeue());
+                    }
+                }
+
+                var latestReturenStatus = DiffStatus.Equal;
+                while (true)
+                {
+                    if (additionQueue.Any() && !deletionQueue.Any())
+                    {
+                        yield return additionQueue.Dequeue();
+                    }
+                    else if (!additionQueue.Any() && deletionQueue.Any())
+                    {
+                        yield return deletionQueue.Dequeue();
+                    }
+                    else if (additionQueue.Any() && deletionQueue.Any())
+                    {
+                        switch (orderType)
+                        {
+                            case DiffOrderType.GreedyDeleteFirst:
+                                yield return deletionQueue.Dequeue();
+                                latestReturenStatus = DiffStatus.Deleted;
+                                break;
+                            case DiffOrderType.GreedyInsertFirst:
+                                yield return additionQueue.Dequeue();
+                                latestReturenStatus = DiffStatus.Inserted;
+                                break;
+                            case DiffOrderType.LazyDeleteFirst:
+                                if (latestReturenStatus != DiffStatus.Deleted)
+                                {
+                                    yield return deletionQueue.Dequeue();
+                                    latestReturenStatus = DiffStatus.Deleted;
+                                }
+                                else
+                                {
+                                    yield return additionQueue.Dequeue();
+                                    latestReturenStatus = DiffStatus.Inserted;
+                                }
+                                break;
+                            case DiffOrderType.LazyInsertFirst:
+                                if (latestReturenStatus != DiffStatus.Inserted)
+                                {
+                                    yield return additionQueue.Dequeue();
+                                    latestReturenStatus = DiffStatus.Inserted;
+                                }
+                                else
+                                {
+                                    yield return deletionQueue.Dequeue();
+                                    latestReturenStatus = DiffStatus.Deleted;
+                                }
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
         }
     }
 }

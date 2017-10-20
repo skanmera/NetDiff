@@ -12,9 +12,9 @@ namespace NetDiff.Test
         {
             var str1 = "abcde";
             var str2 = "abcde";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyDeleteFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyDeleteFirst);
 
             Assert.AreEqual(str1.Count(), results.Count());
             Assert.IsTrue(results.All(r => r.Status == DiffStatus.Equal));
@@ -27,9 +27,9 @@ namespace NetDiff.Test
         {
             var str1 = "abcde";
             var str2 = "abcde";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyInsertFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyInsertFirst);
 
             Assert.AreEqual(str1.Count(), results.Count());
             Assert.IsTrue(results.All(r => r.Status == DiffStatus.Equal));
@@ -42,9 +42,9 @@ namespace NetDiff.Test
         {
             var str1 = "abcde";
             var str2 = "abcde";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.LazyDeleteFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyDeleteFirst);
 
             Assert.AreEqual(str1.Count(), results.Count());
             Assert.IsTrue(results.All(r => r.Status == DiffStatus.Equal));
@@ -57,9 +57,9 @@ namespace NetDiff.Test
         {
             var str1 = "abcde";
             var str2 = "abcde";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.LazyInsertFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyInsertFirst);
 
             Assert.AreEqual(str1.Count(), results.Count());
             Assert.IsTrue(results.All(r => r.Status == DiffStatus.Equal));
@@ -72,9 +72,9 @@ namespace NetDiff.Test
         {
             var str1 = "q4DU8sbeD4JdhFA4hWShCv3bbtD7djX5SaNnQUHJHdCEJs6X2LJipbEEr7bZZbzcUrpuKpRDKNz92x5P";
             var str2 = "3GKLWNDdCxip8kda2r2MUT45RrHUiESQhmhUZtMcpBGcSwJVS9uq4DWBAQk2zPUJCJabaeWuP5mxyPBz";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyDeleteFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2 );
+            results = DiffUtil.Order(results, DiffOrderType.GreedyDeleteFirst);
 
             var src = new string(DiffUtil.CreateSrc(results).ToArray());
             var dst = new string(DiffUtil.CreateDst(results).ToArray());
@@ -87,9 +87,9 @@ namespace NetDiff.Test
         {
             var str1 = "q4DU8sbeD4JdhFA4hWShCv3bbtD7djX5SaNnQUHJHdCEJs6X2LJipbEEr7bZZbzcUrpuKpRDKNz92x5P";
             var str2 = "3GKLWNDdCxip8kda2r2MUT45RrHUiESQhmhUZtMcpBGcSwJVS9uq4DWBAQk2zPUJCJabaeWuP5mxyPBz";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyInsertFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyInsertFirst);
 
             var src = new string(DiffUtil.CreateSrc(results).ToArray());
             var dst = new string(DiffUtil.CreateDst(results).ToArray());
@@ -102,9 +102,9 @@ namespace NetDiff.Test
         {
             var str1 = "q4DU8sbeD4JdhFA4hWShCv3bbtD7djX5SaNnQUHJHdCEJs6X2LJipbEEr7bZZbzcUrpuKpRDKNz92x5P";
             var str2 = "3GKLWNDdCxip8kda2r2MUT45RrHUiESQhmhUZtMcpBGcSwJVS9uq4DWBAQk2zPUJCJabaeWuP5mxyPBz";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.LazyInsertFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyInsertFirst);
 
             var src = new string(DiffUtil.CreateSrc(results).ToArray());
             var dst = new string(DiffUtil.CreateDst(results).ToArray());
@@ -117,24 +117,9 @@ namespace NetDiff.Test
         {
             var str1 = "q4DU8sbeD4JdhFA4hWShCv3bbtD7djX5SaNnQUHJHdCEJs6X2LJipbEEr7bZZbzcUrpuKpRDKNz92x5P";
             var str2 = "3GKLWNDdCxip8kda2r2MUT45RrHUiESQhmhUZtMcpBGcSwJVS9uq4DWBAQk2zPUJCJabaeWuP5mxyPBz";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.LazyDeleteFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
 
-            var src = new string(DiffUtil.CreateSrc(results).ToArray());
-            var dst = new string(DiffUtil.CreateDst(results).ToArray());
-            Assert.AreEqual(dst, str2);
-            Assert.AreEqual(src, str1);
-        }
-
-        [TestMethod]
-        public void Restore_PrioritizedPerformance()
-        {
-            var str1 = "q4DU8sbeD4JdhFA4hWShCv3bbtD7djX5SaNnQUHJHdCEJs6X2LJipbEEr7bZZbzcUrpuKpRDKNz92x5P";
-            var str2 = "3GKLWNDdCxip8kda2r2MUT45RrHUiESQhmhUZtMcpBGcSwJVS9uq4DWBAQk2zPUJCJabaeWuP5mxyPBz";
-            var option = DiffOption<char>.Default;
-            option.Limit = 10;
-            var results = DiffUtil.Diff(str1, str2, option);
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyDeleteFirst);
 
             var src = new string(DiffUtil.CreateSrc(results).ToArray());
             var dst = new string(DiffUtil.CreateDst(results).ToArray());
@@ -151,9 +136,9 @@ namespace NetDiff.Test
         {
             var str1 = "aaa";
             var str2 = "bbb";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyDeleteFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyDeleteFirst);
 
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
@@ -172,9 +157,9 @@ namespace NetDiff.Test
         {
             var str1 = "aaa";
             var str2 = "bbb";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyInsertFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyInsertFirst);
 
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
@@ -193,9 +178,9 @@ namespace NetDiff.Test
         {
             var str1 = "aaa";
             var str2 = "bbb";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.LazyDeleteFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2 );
+            results = DiffUtil.Order(results, DiffOrderType.LazyDeleteFirst).ToList();
 
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
@@ -214,9 +199,9 @@ namespace NetDiff.Test
         {
             var str1 = "aaa";
             var str2 = "bbb";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.LazyInsertFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyInsertFirst);
 
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
@@ -235,33 +220,33 @@ namespace NetDiff.Test
         {
             var str1 = "abc";
             var str2 = "abcd";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyDeleteFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyDeleteFirst);
 
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
 
-            option.Order = DiffOrder.GreedyInsertFirst;
-            results = DiffUtil.Diff(str1, str2, option);
+            results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyInsertFirst);
 
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
 
-            option.Order = DiffOrder.LazyDeleteFirst;
-            results = DiffUtil.Diff(str1, str2, option);
+            results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyDeleteFirst);
 
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
 
-            option.Order = DiffOrder.LazyInsertFirst;
-            results = DiffUtil.Diff(str1, str2, option);
+            results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyInsertFirst);
 
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
@@ -278,33 +263,33 @@ namespace NetDiff.Test
         {
             var str1 = "bcd";
             var str2 = "abcd";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyDeleteFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyDeleteFirst);
 
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(3).Status);
 
-            option.Order = DiffOrder.GreedyInsertFirst;
-            results = DiffUtil.Diff(str1, str2, option);
+            results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyInsertFirst);
 
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(3).Status);
 
-            option.Order = DiffOrder.LazyDeleteFirst;
-            results = DiffUtil.Diff(str1, str2, option);
+            results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyDeleteFirst);
 
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(2).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(3).Status);
 
-            option.Order = DiffOrder.LazyInsertFirst;
-            results = DiffUtil.Diff(str1, str2, option);
+            results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyInsertFirst);
 
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(1).Status);
@@ -317,9 +302,9 @@ namespace NetDiff.Test
         {
             var str1 = "cdhijkz";
             var str2 = "ldxhnokz";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyDeleteFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyDeleteFirst);
 
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
@@ -339,9 +324,9 @@ namespace NetDiff.Test
         {
             var str1 = "cdhijkz";
             var str2 = "ldxhnokz";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyInsertFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyInsertFirst);
 
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
@@ -361,9 +346,9 @@ namespace NetDiff.Test
         {
             var str1 = "cdhijkz";
             var str2 = "ldxhnokz";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.LazyDeleteFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyDeleteFirst);
 
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
@@ -383,9 +368,9 @@ namespace NetDiff.Test
         {
             var str1 = "cdhijkz";
             var str2 = "ldxhnokz";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.LazyInsertFirst;
-            var results = DiffUtil.Diff(str1, str2, option);
+
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyInsertFirst);
 
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
@@ -405,60 +390,60 @@ namespace NetDiff.Test
         {
             var str1 = "aaa";
             var str2 = "bbb";
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyDeleteFirst;
-            var results = DiffUtil.OptimizeCaseDeletedFirst(DiffUtil.Diff(str1, str2, option)).ToList();
 
             /*
                 obj1  a a a 
                 obj2      b b b  
                       - - M + + 
             */
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyDeleteFirst);
+            results = DiffUtil.OptimizeCaseDeletedFirst(results);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
             Assert.AreEqual(DiffStatus.Modified, results.ElementAt(2).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(3).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(4).Status);
 
-            option.Order = DiffOrder.LazyDeleteFirst;
-            results = DiffUtil.OptimizeCaseDeletedFirst(DiffUtil.Diff(str1, str2, option)).ToList();
 
             /*
-                obj1  a a a 
+                obj1      a a a 
                 obj2  b b b
+                      + + M - -
+            */
+            results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyInsertFirst);
+            results = DiffUtil.OptimizeCaseInsertedFirst(results);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
+            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
+            Assert.AreEqual(DiffStatus.Modified, results.ElementAt(2).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(3).Status);
+            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(4).Status);
+
+
+            /*
+                obj1  a a a
+                obj2  b b b   
                       M M M
             */
+            results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyDeleteFirst);
+            results = DiffUtil.OptimizeCaseDeletedFirst(results);
             Assert.AreEqual(DiffStatus.Modified, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Modified, results.ElementAt(1).Status);
             Assert.AreEqual(DiffStatus.Modified, results.ElementAt(2).Status);
 
-            option.Order = DiffOrder.GreedyInsertFirst;
-            results = DiffUtil.OptimizeCaseDeletedFirst(DiffUtil.Diff(str1, str2, option)).ToList();
-
             /*
-                obj1        a a a
+                obj1  a a a
                 obj2  b b b   
-                      + + + - - -
+                      M M M
             */
-            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
-            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
-            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(2).Status);
-            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(3).Status);
-            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(4).Status);
-            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(5).Status);
-
-            option.Order = DiffOrder.LazyInsertFirst;
-            results = DiffUtil.OptimizeCaseDeletedFirst(DiffUtil.Diff(str1, str2, option)).ToList();
-
-            /*
-                obj1    a a
-                obj2  b b b a
-                      + M M -
-            */
-            Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(0).Status);
+            results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyInsertFirst);
+            results = DiffUtil.OptimizeCaseInsertedFirst(results);
+            Assert.AreEqual(DiffStatus.Modified, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Modified, results.ElementAt(1).Status);
             Assert.AreEqual(DiffStatus.Modified, results.ElementAt(2).Status);
-            Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(3).Status);
         }
 
         [TestMethod]
@@ -467,10 +452,8 @@ namespace NetDiff.Test
             string str1 = "abbbc";
             string str2 = "adbbc";
 
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyInsertFirst;
-
-            var results = DiffUtil.Diff(str1, str2, option);
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyInsertFirst);
 
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
@@ -486,29 +469,24 @@ namespace NetDiff.Test
             string str1 = "abbbc";
             string str2 = "adbbc";
 
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyDeleteFirst;
-
-            var results = DiffUtil.Diff(str1, str2, option);
+            var results = DiffUtil.Diff(str1, str2 );
+            results = DiffUtil.Order(results, DiffOrderType.GreedyDeleteFirst);
 
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(2).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(3).Status);
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(4).Status);
-            Assert.AreEqual(DiffStatus.Equal, results.ElementAt(5).Status);
         }
 
         [TestMethod]
-        public void CaseRepeat_InsertDeleteFirst()
+        public void CaseRepeat_LazyInsertFirst()
         {
             string str1 = "abbbc";
             string str2 = "adbbc";
 
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.LazyInsertFirst;
-
-            var results = DiffUtil.Diff(str1, str2, option);
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyInsertFirst);
 
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
@@ -524,10 +502,8 @@ namespace NetDiff.Test
             string str1 = "abbbc";
             string str2 = "adbbc";
 
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.LazyDeleteFirst;
-
-            var results = DiffUtil.Diff(str1, str2, option);
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.LazyDeleteFirst);
 
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
@@ -544,10 +520,11 @@ namespace NetDiff.Test
             var str1 = "abc";
             var str2 = "dBf";
 
-            var option = DiffOption<char>.Default;
+            var option = new DiffOption<char>();
             option.EqualityComparer = new CaseInsensitiveComparer();
 
             var results = DiffUtil.Diff(str1, str2, option);
+            results = DiffUtil.Order(results, DiffOrderType.LazyDeleteFirst);
 
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Inserted, results.ElementAt(1).Status);
@@ -562,10 +539,8 @@ namespace NetDiff.Test
             string str1 = "abbbc";
             string str2 = "adbbc";
 
-            var option = DiffOption<char>.Default;
-            option.Order = DiffOrder.GreedyDeleteFirst;
-
-            var results = DiffUtil.Diff(str1, str2, option);
+            var results = DiffUtil.Diff(str1, str2);
+            results = DiffUtil.Order(results, DiffOrderType.GreedyDeleteFirst);
 
             Assert.AreEqual(DiffStatus.Equal, results.ElementAt(0).Status);
             Assert.AreEqual(DiffStatus.Deleted, results.ElementAt(1).Status);
@@ -622,8 +597,8 @@ namespace NetDiff.Test
             var str1 = Enumerable.Repeat("Good dog", 1000).SelectMany(c => c);
             var str2 = Enumerable.Repeat("Bad dog", 1000).SelectMany(c => c);
 
-            var option = DiffOption<char>.Default;
-            option.Limit = 100;
+            var option = new DiffOption<char>();
+            option.Limit = 1000;
 
             var sw = new System.Diagnostics.Stopwatch();
             sw.Start();
