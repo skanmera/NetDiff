@@ -68,13 +68,13 @@ namespace NetDiff
 
     internal class EditGraph<T>
     {
-        private T[] seq1;
-        private T[] seq2;
+        private readonly T[] seq1;
+        private readonly T[] seq2;
+        private readonly int offset;
+        private readonly Point endpoint;
         private DiffOption<T> option;
         private List<Node> heads;
-        private Point endpoint;
         private int[] farthestPoints;
-        private int offset;
         private bool isEnd;
 
         public EditGraph(
