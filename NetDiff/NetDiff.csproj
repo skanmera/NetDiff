@@ -1,17 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <version>1.2.0</version>
-    <title>Diff4Net</title>
-    <authors>skanmera</authors>
-    <owners>skanmera</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>C# implementation of the Diff algorithm</description>
-    <releaseNotes>Improve performance</releaseNotes>
-    <copyright>Copyright 2017</copyright>
-    <tags>Diff diff</tags>
-  </PropertyGroup>
-
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Version>5.0.0</Version>
+		<Title>Diff4Net</Title>
+		<Authors>skanmera</Authors>
+		<Owners>skanmera</Owners>
+		<RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+		<Description>C# implementation of the Diff algorithm</Description>
+		<ReleaseNotes>Improve performance</ReleaseNotes>
+		<Copyright>Copyright 2021</Copyright>
+		<Tags>Diff diff</Tags>
+	</PropertyGroup>
 
 </Project>
